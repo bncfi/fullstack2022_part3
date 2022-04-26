@@ -44,11 +44,7 @@ app.delete('/api/persons/:id', (request,response,next) => {
 
 app.post('/api/persons/', (request,response,next) => {
     const body = request.body
-    if (body === undefined) {
-        return response.status(400).json({
-            error: 'content missing'
-        })
-    } else {
+
     const person = new Person({
         name: request.body.name,
         number: request.body.number,
@@ -56,16 +52,15 @@ app.post('/api/persons/', (request,response,next) => {
     person.save().then(savedNote => {
         response.json(savedNote)
     })
-    }
+    .catch(error => next(error))
+    
 })
 
 app.put('/api/persons/:id', (request,response,next) => {
     const body = request.body
-    const person = {
-        name: body.name,
-        number: body.number
-    }
-    Person.findByIdAndUpdate(request.params.id, person, {new:true})
+    const {name, number} = body
+
+    Person.findByIdAndUpdate(request.params.id, {name, number}, {new:true, runValidators: true, context: 'query'})
         .then(updatedPerson => {
             response.json(updatedPerson)
         })
